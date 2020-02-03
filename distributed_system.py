@@ -1,5 +1,14 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib import cm
+from mpl_toolkits.mplot3d import Axes3D
+
+
+import sys
+
+if not sys.warnoptions:
+    import warnings
+    warnings.simplefilter("ignore")
 
 # basic parameters:
 arrival_rate = 0.8
@@ -151,22 +160,27 @@ def timing_process(left_vehicle_coordinates, right_vehicle_coordinates):
 
 
 time_records = []
-arrival_rates = [1.0, 0.8, 0.6, 0.4, 0.2, 0.1, 0.05, 0.02, 0.01]
-segment_lengths = [100, 200, 400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000, 3000]
+arrival_rates = [2.0, 1.0, 0.8, 0.6, 0.4, 0.2, 0.1, 0.05, 0.02, 0.01]
+segment_lengths = [100, 200, 400, 600, 800, 1000, 1200, 1400, 1600, 1800]
 for arrival_rate in arrival_rates:
-	for i in range(100):
-		util = []
-		left_vehicle_coordinates, right_vehicle_coordinates = generate_random_seed(arrival_rate, segment_length)
-		util.append(timing_process(left_vehicle_coordinates, right_vehicle_coordinates))
-	time_records.append(np.average(util))
+	for segment_length in segment_lengths:
+		for i in range(20):
+			util = []
+			left_vehicle_coordinates, right_vehicle_coordinates = generate_random_seed(arrival_rate, segment_length)
+			util.append(timing_process(left_vehicle_coordinates, right_vehicle_coordinates))
+		time_records.append(np.average(util))
 
-# for segment_length in segment_lengths:
-# 	for i in range(100):
-# 		util = []
-# 		left_vehicle_coordinates, right_vehicle_coordinates = generate_random_seed(0.8, segment_length)
-# 		util.append(timing_process(left_vehicle_coordinates, right_vehicle_coordinates))
-# 	time_records.append(np.average(util))
 
-plt.plot(arrival_rates, time_records)
+x = np.array(arrival_rates)
+y = np.array(segment_lengths)
+x, y = np.meshgrid(x, y)
+
+
+z = np.array(time_records)
+fig = plt.figure()
+ax = fig.gca(projection='3d')
+surf = ax.plot_surface(x, y, z, cmap=cm.coolwarm,
+                       linewidth=0, antialiased=False)
+fig.colorbar(surf, shrink=0.5, aspect=5)
 plt.show()
-plt.savefig("arrival_rates.png")
+
